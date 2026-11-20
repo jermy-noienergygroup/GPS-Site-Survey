@@ -704,7 +704,7 @@ function fileFor(kind) {
 }
 
 function download(f) {
-  const blob = new Blob([f.text], { type: f.type });
+  const blob = new Blob([f.bytes || f.text], { type: f.type });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = f.name;
@@ -715,7 +715,7 @@ function download(f) {
 
 async function share(f) {
   // Some apps reject unusual types; plain text is the safest for sharing.
-  const file = new File([f.text], f.name, { type: f.type === 'application/vnd.google-earth.kml+xml' ? 'application/octet-stream' : f.type });
+  const file = new File([f.bytes || f.text], f.name, { type: f.type === 'application/vnd.google-earth.kml+xml' ? 'application/octet-stream' : f.type });
   try {
     await navigator.share({ files: [file], title: f.name });
     return true;
@@ -741,6 +741,10 @@ function openExport() {
   ];
   openSheet(`<div class="sheet-head"><h2>Export and backup</h2><button class="btn" id="x-close">Close</button></div>
     <div class="scroll pad">
+      <div class="list-block"><b>Map PDF</b><div class="muted small">Site map with numbered pins, lots, legend and scale, plus the summary</div>
+        <div class="seg" id="x-base"><button data-b="sat" class="on">Satellite</button><button data-b="street">Street map</button></div>
+        <div class="row"><button class="btn primary" data-pdf="dl" style="flex:1">Download PDF</button>
+        ${shareOk ? '<button class="btn" data-pdf="sh" style="flex:1">Share PDF</button>' : ''}</div></div>
       <div class="row" style="margin-bottom:12px"><button class="btn primary" id="x-copy" style="flex:1">Copy summary</button>
         ${navigator.share ? '<button class="btn" id="x-sharetext" style="flex:1">Share summary text</button>' : ''}</div>
       ${rows.map(([k, label, sub]) => `<div class="list-block"><b>${label}</b><div class="muted small">${sub}</div>
@@ -756,6 +760,30 @@ function openExport() {
     b.onclick = async () => {
       const f = fileFor(b.dataset.sh);
       if (await share(f)) markBackup(b.dataset.sh); else { toast('Sharing not available, downloading instead'); download(f); markBackup(b.dataset.sh); }
+    };
+  });
+  let pdfBase = 'sat';
+  $('#x-base').querySelectorAll('button').forEach((b) => {
+    b.onclick = () => { pdfBase = b.dataset.b; $('#x-base').querySelectorAll('button').forEach((x) => x.classList.toggle('on', x === b)); };
+  });
+  $('#sheet').querySelectorAll('[data-pdf]').forEach((b) => {
+    b.onclick = async () => {
+      if (!cur.pins.length) { toast('No pins yet'); return; }
+      const btns = $('#sheet').querySelectorAll('[data-pdf]');
+      btns.forEach((x) => { x.disabled = true; });
+      try {
+        const { buildMapPdf } = await import('./pdf.js');
+        const bytes = await buildMapPdf(cur, { base: pdfBase, onProgress: (m) => toast(m, 20000) });
+        const f = { name: `${safeFileName(cur.name)}-map-${new Date().toISOString().slice(0, 10)}.pdf`, type: 'application/pdf', bytes };
+        toast('PDF ready');
+        if (b.dataset.pdf === 'sh' && await share(f)) return;
+        download(f);
+      } catch (e) {
+        console.error(e);
+        toast('PDF failed: ' + (e && e.message ? e.message : e), 5000);
+      } finally {
+        btns.forEach((x) => { x.disabled = false; });
+      }
     };
   });
   $('#x-copy').onclick = async () => {

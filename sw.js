@@ -1,12 +1,12 @@
 // Offline support: the app opens with no signal, and map tiles you have already viewed stay cached.
 // Bump VERSION whenever app files change so phones pick up the update.
-const VERSION = 'v1';
+const VERSION = 'v2';
 const APP_CACHE = `gss-app-${VERSION}`;
 const TILE_CACHE = 'gss-tiles';
 const MAX_TILES = 3000;
 
 const APP_FILES = [
-  './', './index.html', './css/app.css', './js/app.js', './js/logic.js', './manifest.webmanifest',
+  './', './index.html', './css/app.css', './js/app.js', './js/logic.js', './js/pdf.js', './js/vendor/pdf-lib.esm.min.js', './manifest.webmanifest',
   './icons/icon-192.png', './icons/icon-512.png',
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',

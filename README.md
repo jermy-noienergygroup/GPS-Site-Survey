@@ -17,7 +17,7 @@ Live at: https://jermy-noienergygroup.github.io/GPS-Site-Survey/
 6. **☰ menu**:
    - **List and totals**: pcs-first counts by lot and overall, plus every pin.
    - **Match photos**: take photos with your normal camera. Afterward, pick them here and each one is linked to a pin by its GPS location or time. Photos stay in your camera roll; only file names are saved.
-   - **Export and backup**: copy or share the summary; download or share the KML (Google Earth / My Maps), CSV, or a backup file.
+   - **Export and backup**: a **map PDF** (satellite or street) with numbered pins, shaded lots, legend, scale and north arrow, followed by the summary and pin list; copy or share the summary; download or share the KML (Google Earth / My Maps), CSV, or a backup file.
    - **Edit survey**: rename, add or remove styles and lots (only unused ones can be removed), delete the survey.
 
 ## Where the data lives
@@ -33,10 +33,12 @@ The app works with no signal once it has been opened online once. Map tiles you 
 | `index.html` | Page layout |
 | `css/app.css` | Styling |
 | `js/app.js` | Screens, map, GPS, pin sheet, photos, exports |
+| `js/pdf.js` | Map PDF: stitches map tiles onto a canvas, draws pins/lots/legend, adds summary pages |
+| `js/vendor/pdf-lib.esm.min.js` | [pdf-lib](https://pdf-lib.js.org) 1.17.1 (MIT), bundled so PDFs work offline |
 | `js/logic.js` | Counts, summary text, CSV, KML, photo matching, EXIF reader (no browser code; tested) |
 | `sw.js` | Offline caching. **Bump `VERSION` when you change app files.** |
 | `manifest.webmanifest`, `icons/` | Home-screen install |
-| `tests/` | `node tests/test-logic.mjs` for logic; `tests/ui-check.mjs` is a Playwright smoke test |
+| `tests/` | `node tests/test-logic.mjs` for logic; `ui-check.mjs` and `pdf-check.mjs` are Playwright smoke tests |
 
 No build step: GitHub Pages serves the files as they are. Map: [Leaflet](https://leafletjs.com) from unpkg; satellite imagery from Esri World Imagery, street map from OpenStreetMap. Both tile sources have usage terms; light use like this is normally fine, but heavy commercial use of Esri imagery officially calls for an ArcGIS account.
 
